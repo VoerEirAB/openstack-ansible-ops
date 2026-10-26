@@ -23,14 +23,14 @@
       when: host_to_be_removed is not defined
     - name: Find ID of the nova-compute service we want to remove
       shell: |
-        . {{ ansible_env.HOME }}/openrc
+        . /home/ubuntu/openstack-ansible/openrc && \
         openstack compute service list | grep {{ host_to_be_removed }} | awk '{print $2}'
       register: results
       changed_when: results.rc == 0 and results.stdout_lines|length > 0
       failed_when: results.rc > 0 or results.stdout_lines|length == 0
     - name: Find ID of the neutron agent service we want to remove
       shell: |
-        . {{ ansible_env.HOME }}/openrc
+        . /home/ubuntu/openstack-ansible/openrc
         neutron agent-list | grep {{ host_to_be_removed }} | awk '{print $2}'
       register: neutron_agent_list_results
       changed_when: neutron_agent_list_results.rc == 0
@@ -38,14 +38,14 @@
   tasks:
     - name: Remove the nova-compute service from compute node
       shell: |
-        . {{ ansible_env.HOME }}/openrc
+        . /home/ubuntu/openstack-ansible/openrc
         openstack compute service delete {{ results.stdout }}
       register: compute_delete_result
       changed_when: compute_delete_result.rc
       failed_when: compute_delete_result.rc > 0
     - name: Remove neutron agent service on {{ host_to_be_removed }}
       shell: |
-        . {{ ansible_env.HOME }}/openrc
+        . /home/ubuntu/openstack-ansible/openrc
         neutron agent-delete {{ item }}
       with_items: "{{ neutron_agent_list_results.stdout_lines }}"
       register: neutron_delete_results
